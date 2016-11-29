@@ -22,3 +22,6 @@ We based our implementation on a [paper](https://www.google.com/url?sa=t&rct=j&q
 
 A dataset of approximately 4000 sounds divided in 4 categories (wood, water, fans and voices) was built in order to have a training set for the machine learning step. The idea is to use the last layer of the convnet as feature vector for each sound, and to use [t-SNE](https://lvdmaaten.github.io/tsne/) in order to reduce the dimenions of the feature vector to 3 and be able to plot each audio sample on our 3d environment.
 
+## Results
+
+While the sound classification is still a work in progress, we managed to build the 3d environment using [OpenFrameworks](http://openframeworks.cc/) and using t-SNE directly with some spectral features describing each audio chunk. The current ways to exlore it are either by using a mouse and hovering on the spheres to listen to the associated sound, or to send a set of X,Y and Z coordinates via OSC to position the listener in the space: the 6 nearest sounds will be heard according to their position, using [ambisonics](https://en.wikipedia.org/wiki/Ambisonics).
