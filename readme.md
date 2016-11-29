@@ -25,3 +25,15 @@ A dataset of approximately 4000 sounds divided in 4 categories (wood, water, fan
 ## Results
 
 While the sound classification is still a work in progress, we managed to build the 3d environment using [OpenFrameworks](http://openframeworks.cc/) and using t-SNE directly with some spectral features describing each audio chunk. The current ways to exlore it are either by using a mouse and hovering on the spheres to listen to the associated sound, or to send a set of X,Y and Z coordinates via OSC to position the listener in the space: the 6 nearest sounds will be heard according to their position, using [ambisonics](https://en.wikipedia.org/wiki/Ambisonics).
+
+## Team
+
+- MaX Zanoni: massimiliano.zanoni@polimi.it
+- Jacopo Foglietti: fogliettijacopo@gmail.com
+- Luca Mucci: luca4cmp@gmail.com
+- Daniele Ciminieri: daniele@dotdotdot.it
+- Gabriele Balzano: gabry.balza@gmail.com
+- Sergio Missaglia: sergio.missaglia1@gmail.com
+- Alessandro Inguglia: alessandro@recipient.cc
+- Massimiliano Viel: info@massimilianoviel.net
+- Francesca Bonalume: bonalumefrancesca@gmail.com
