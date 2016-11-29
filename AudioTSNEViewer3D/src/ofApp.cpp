@@ -8,13 +8,14 @@ ofxJSONElement result;
 //--------------------------------------------------------------
 void ofApp::setup(){
     
+	bOscSend = false;
     sender.setup(HOST, SENDPORT);
     receiver.setup (RECEIVEPORT);
     gui.setup();
     gui.setName("Audio t-SNE");
-    gui.add(maxDuration.set("maxDuration", 1.0, 0.1, 2.0));
-    gui.add(mouseRadius.set("mouseRadius", 250, 100, 500));
-    gui.add(pauseLength.set("pauseLength", 2.0, 0.2, 5.0));
+    gui.add(maxDuration.set("maxDuration", 0.5f, 0.01f, 2.0f));
+    gui.add(mouseRadius.set("mouseRadius", 12.0f, 1.0f, 20.0f));
+    gui.add(pauseLength.set("pauseLength", 2.0f, 0.2f, 5.0f));
     gui.add(receiveOscIP.set("sendIP","127.0.0.1"));
 
     dimensions = ofPoint(ofGetWidth(), ofGetHeight(), 1200.0f);
@@ -22,8 +23,6 @@ void ofApp::setup(){
     ofBackground(0);
     
     string file = "points3D.json";
-    
-    //cout<<result[0]["path"].asString()<<endl;
     bool parsingSuccessful = result.open(file);
     
     for (int i=0; i<result.size(); i++) {
@@ -32,12 +31,12 @@ void ofApp::setup(){
         float y = 2.0f * result[i]["point"][1].asFloat() - 1.0f;
         float z = 2.0f * result[i]["point"][2].asFloat() - 1.0f;
         AudioClip newSound;
-        //snewSound.sound.load(path);
+        newSound.sound.load(path);
+		newSound.path = path;
         newSound.point.set(x, y, z);
         newSound.polCoords = CarToPol(newSound.point);
         newSound.t = 0;
-        //newSound.sound.setVolume(0.06);
-        newSound.sound.setVolume(0);
+        newSound.sound.setVolume(0.06);
         sounds.push_back(newSound);
     }
     
@@ -49,7 +48,7 @@ void ofApp::setup(){
 //--------------------------------------------------------------
 void ofApp::update()
 {
-    
+	//OSC SECTION//
     // hide old messages
     for(int i = 0; i < NUM_MSG_STRINGS; i++){
         if(timers[i] < ofGetElapsedTimef()){
@@ -71,37 +70,43 @@ void ofApp::update()
             currentNavPos.y = m.getArgAsFloat(1);
             currentNavPos.z = m.getArgAsFloat(2);
         }
-        findCollisions(currentNavPos);
+        //findCollisions(currentNavPos);
     }
     
+	//SOUND UPDATE SECTION//
     for (int i=0; i<sounds.size(); i++)
     {
         if (sounds[i].sound.isPlaying() && sounds[i].sound.getPositionMS() > maxDuration*1000)
         {
             sounds[i].sound.stop();
+			//sounds[i].sound.unload();
         }
     }
     ofSoundUpdate();
-    currentNavPos += 2.0f*(ofNoise(ofGetElapsedTimef()*0.1))-1.0f;
+	ofSetWindowTitle(ofToString(ofGetFrameRate()));
+
+	//Debug Move Center Point
+    //currentNavPos += 2.0f*(ofNoise(ofGetElapsedTimef()*0.1))-1.0f;
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-    camera.setPosition(currentNavPos);
+    //camera.setPosition(currentNavPos);
     camera.begin();
     
-    ofPushMatrix();
+    //ofPushMatrix();
     
+
     for (int i=0; i<sounds.size(); i++)
     {
         if (sounds[i].sound.isPlaying())
         {
-            glBegin(GL_LINES);
-            glColor3f(sounds[i].point.x, sounds[i].point.y,sounds[i].point.z);
-            glVertex3f(sounds[i].point.x*dimensions.x, sounds[i].point.y*dimensions.y,sounds[i].point.z*dimensions.z);
-            glColor3f(255,255,255);
-            glVertex3f(currentNavPos.x, currentNavPos.y,currentNavPos.z);
-            glEnd();
+            //glBegin(GL_LINES);
+            //glColor3f(sounds[i].point.x, sounds[i].point.y,sounds[i].point.z);
+            //glVertex3f(sounds[i].point.x*dimensions.x, sounds[i].point.y*dimensions.y,sounds[i].point.z*dimensions.z);
+			//glColor3f(255, 255, 255);
+			//glVertex3f(lastPlaying.point.x, lastPlaying.point.y, lastPlaying.point.z);  
+            //glEnd();
 
 //            for (int j=0; j<sounds.size(); j++)
 //            {
@@ -114,7 +119,7 @@ void ofApp::draw(){
 //                    //ofSetColor(sphereCol);
 //                    //ofDrawLine(sounds[i].point * dimensions, sounds[j].point * dimensions);
 //            }
-            //ofSetColor(255, 255, 255, 180);
+            ofSetColor(255, 255, 255, 180);
         }
         else
         {
@@ -122,19 +127,16 @@ void ofApp::draw(){
             ofColor sphereCol = ofColor(colScal.x,colScal.y,colScal.z);
             ofSetColor(sphereCol);
         }
-        ofDrawSphere(sounds[i].point.x * ofGetWidth(), sounds[i].point.y*ofGetHeight(), sounds[i].point.z * dimensions.z,  10);
+        ofDrawSphere(sounds[i].point.x * dimensions.x, sounds[i].point.y*dimensions.y, sounds[i].point.z * dimensions.z,  10);
 
     }
-    //debug draw moving agent
+    //DEBUG DRAW MOVING AGENT
     //ofSetColor(255, 255, 255,120);
     //ofDrawSphere(currentNavPos,55);
-    ofPopMatrix();
+    //ofPopMatrix();
     camera.end();
     
-    ofPushMatrix();
     gui.draw();
-    ofPopMatrix();
-
 }
 
 ofVec3f ofApp::CarToPol(ofPoint thisPoint)
@@ -186,18 +188,26 @@ void ofApp::findCollisions(ofVec3f point)
 
 //--------------------------------------------------------------
 void ofApp::mouseMoved(int x, int y ){
-    
+	float mouseX = x;
+	float mouseY = y;
+
     for (int i=0; i<sounds.size(); i++)
     {
-        ofPoint tempPoint = ofPoint(sounds[i].point.x * ofGetWidth(), sounds[i].point.y * ofGetHeight(), sounds[i].point.z * dimensions.z);
-        ofPoint projectedPoint = camera.worldToScreen(tempPoint);
-        float distanceToMouse = ofDistSquared(x, y, projectedPoint.x, projectedPoint.y);
-        if (distanceToMouse < mouseRadius && !sounds[i].sound.isPlaying() && (ofGetElapsedTimef() - sounds[i].t > pauseLength))
-        {
-            sounds[i].t = ofGetElapsedTimef();
-            sounds[i].sound.play();
-            OscSendPointData(sounds[i].polCoords,result[i]["path"].asString());
-        }
+		ofPoint soundPoint = sounds[i].point * dimensions;
+		//ofPoint soundPoint = (0.5f + (sounds[i].point / 2.0f)) * dimensions;
+        ofPoint projectedPoint = camera.worldToScreen(soundPoint);
+        float distanceToMouse = ofDist(mouseX, mouseY, projectedPoint.x, projectedPoint.y);
+		if (distanceToMouse < mouseRadius && !sounds[i].sound.isPlaying() && (ofGetElapsedTimef() - sounds[i].t > pauseLength)) //&& currentPlayingSounds<maxPlayingSounds)
+		{
+			sounds[i].t = ofGetElapsedTimef();
+			//sounds[i].sound.load(sounds[i].path);
+			sounds[i].sound.play();
+			cout << "collided with #" + ofToString(i) << endl;
+			if (bOscSend)
+			{
+				OscSendPointData(sounds[i].polCoords, result[i]["path"].asString());
+			}
+		}
     }
 }
 

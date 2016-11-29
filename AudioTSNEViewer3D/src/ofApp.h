@@ -16,6 +16,7 @@ public:
     ofSoundPlayer sound;
     ofPoint point;
     ofVec3f polCoords;
+	string path;
     float t;
 };
 
@@ -43,7 +44,7 @@ public:
     void dragEvent(ofDragInfo dragInfo);
     void gotMessage(ofMessage msg);
     void findCollisions(ofVec3f point);
-    ofVec3f CarToPol (ofVec3f p);
+    ofVec3f CarToPol (ofPoint thisPoint);
     void OscSendPointData (ofVec3f polCoords, string path);
     vector<AudioClip> sounds;
     
@@ -57,7 +58,7 @@ public:
     ofPoint ambiData;
     string msg_strings[NUM_MSG_STRINGS];
     float timers[NUM_MSG_STRINGS];
-    
+	bool bOscSend;
     //MOST HOA CLASSES REQUIRE ARGUMENTS FOR INITILIZATION, SO WE CREATE THEM AS POINTERS
 //    Encoder<Hoa2d, float>::DC hoaEncoder = Encoder<Hoa2d, float>::DC(order);
 //    Decoder<Hoa2d, float>::Binaural hoaDecoder = Decoder<Hoa2d, float>::Binaural(order);
