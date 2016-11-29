@@ -15,5 +15,10 @@ The second part of the project, on the other hand, can be especially useful for 
 ## Realization
 
 We based our implementation on a [paper](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&cad=rja&uact=8&ved=0ahUKEwjgyOSm3s3QAhWHCsAKHf0qDaYQFggjMAA&url=http%3A%2F%2Fkarol.piczak.com%2Fpapers%2FPiczak2015-ESC-ConvNet.pdf&usg=AFQjCNEiXav5RG38ouVrn5HxrdeDfPOCnw&sig2=T41gwBtoQJ3glYS2WU5G3Q) by Karol J. Piczak, describing a suitable approach for what we wanted to do. 
+
+![Architecture](/images/architecture.jpg)
+
+*The Architecture of the approach proposed in the paper*
+
 A dataset of approximately 4000 sounds divided in 4 categories (wood, water, fans and voices) was built in order to have a training set for the machine learning step. The idea is to use the last layer of the convnet as feature vector for each sound, and to use [t-SNE](https://lvdmaaten.github.io/tsne/) in order to reduce the dimenions of the feature vector to 3 and be able to plot each audio sample on our 3d environment.
 
