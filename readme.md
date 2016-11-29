@@ -1,6 +1,6 @@
-# SOUNDBOX
+# SOUNDCUBE
 
-![Soundcube](/images/soundcube.jpg)
+![Soundcube](/images/soundbox.jpg)
 
 
 ## Concept
