@@ -4,26 +4,16 @@
 #include "ofxGui.h"
 #include "ofxJSON.h"
 #include "ofxOsc.h"
+#include "SonicSphere.h"
 //#include "ofxHoa.h"
 
 #define HOST "localhost"
 #define SENDPORT 1234
 #define RECEIVEPORT 2345
 #define NUM_MSG_STRINGS 20
-
-struct AudioClip {
-public:
-    ofSoundPlayer sound;
-    ofPoint point;
-    ofVec3f polCoords;
-	string path;
-    float t;
-};
-
-//class SoundEmitter
-//{
-//    
-//}
+#define XDIM 2500
+#define YDIM 2500
+#define ZDIM 2500
 
 class ofApp : public ofBaseApp{
     
@@ -46,11 +36,16 @@ public:
     void findCollisions(ofVec3f point);
     ofVec3f CarToPol (ofPoint thisPoint);
     void OscSendPointData (ofVec3f polCoords, string path);
-    vector<AudioClip> sounds;
+	void updateActiveClasses(string cat, bool bDraw);
+	void colorLerpChanged(float &f);
+	void updateDuration(float &f);
+//    vector<AudioClip> sounds;
     
     ofParameter<float> maxDuration;
     ofParameter<float> mouseRadius;
     ofParameter<float> pauseLength;
+	ofParameter<float> colorSpaceLerp;
+	ofParameter<bool> bRotateSystem;
     
     ofxPanel gui;
     ofEasyCam camera;
@@ -59,7 +54,14 @@ public:
     string msg_strings[NUM_MSG_STRINGS];
     float timers[NUM_MSG_STRINGS];
 	bool bOscSend;
-    //MOST HOA CLASSES REQUIRE ARGUMENTS FOR INITILIZATION, SO WE CREATE THEM AS POINTERS
+
+	vector<SonicSphere> sonicSpheres;
+	bool bShowMetallic = true;
+	bool bShowWooden = true;
+	bool bShowVoice = true;
+	bool bShowLiquid = true;
+
+//						HOA BINAURAL INIT 
 //    Encoder<Hoa2d, float>::DC hoaEncoder = Encoder<Hoa2d, float>::DC(order);
 //    Decoder<Hoa2d, float>::Binaural hoaDecoder = Decoder<Hoa2d, float>::Binaural(order);
 //    Optim<Hoa2d, float>::Basic hoaOptim = Optim<Hoa2d, float>::Basic(order);
