@@ -1,4 +1,10 @@
 
+# Author: Massimiliano Zanoni
+# Created on 11/12/2016
+
+# Rename files of a specific format in a given folder using a progressive code
+
+
 
 from matplotlib import pyplot as plt
 import matplotlib.cm as cm

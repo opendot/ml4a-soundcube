@@ -1,10 +1,12 @@
-from matplotlib import pyplot as plt
-import matplotlib.cm as cm
+
+# Author: Massimiliano Zanoni
+# Created on 11/12/2016
+
+# Rename files of a specific format in a given folder using a progressive code
+
+
 import fnmatch
 import os
-import numpy as np
-import librosa
-from sklearn.manifold import TSNE
 import json
 from subprocess import call
 
@@ -16,7 +18,6 @@ from subprocess import call
 soundClass = 'legno'
 path = '/Users/MaX/Desktop/ML4A/Project/data_seg/'+soundClass+'/'
 path_out = '/Users/MaX/Desktop/ML4A/Project/data_seg/'+soundClass+'/'
-SET_TIME = 1
 ext = '.wav'
 
 

@@ -10,7 +10,7 @@ from sklearn.manifold import TSNE
 import json
 
 
-soundClass = 'metallici'
+soundClass = 'legno'
 path = '/Users/MaX/Desktop/ML4A/Project/data_seg/'+soundClass+'/'
 path_seg = '/Users/MaX/Desktop/ML4A/Project/data_seg/'+soundClass+'/'
 path_out = '/Users/MaX/Desktop/ML4A/Project/data_out/'+soundClass+'/'
@@ -49,11 +49,9 @@ if __name__ == "__main__":
     
     print("found "+ext+" %d files in %s"%(len(files),path))
     
-    
-    feature_vectors_MFCC = []
-    feature_vectors_MEL = []
-    feature_vectors_STFT = []  
+
     data = []  
+    data_mean = []
     
     for i,f in enumerate(files):
         
@@ -72,12 +70,18 @@ if __name__ == "__main__":
         #b = feat['stft'].tolist()
         b = []
         c = feat['mel'].tolist()
+        c_mean = np.mean(c,1).tolist()
     
         data.append({'path':files[i],'stft': b,'mel':c, 'class':soundClass})
+        data_mean.append({'path':files[i],'stft': b,'mel':c_mean, 'class':soundClass})
 
-    tail, filename = os.path.split(f)
-    with open(path_out+soundClass+'.json', 'w') as f:
-        json.dump(data, f)    
+    #tail, filename = os.path.split(f)
+    #with open(path_out+soundClass+'.json', 'w') as f:
+    #    json.dump(data, f) 
+        
+    with open(path_out+soundClass+'_mean.json', 'w') as f_mean:
+        json.dump(data_mean, f_mean)    
+        
             
             
             
