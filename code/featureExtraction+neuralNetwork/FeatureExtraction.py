@@ -8,30 +8,34 @@ import numpy as np
 import librosa
 from sklearn.manifold import TSNE
 import json
+import time
+import progressbar as prog
 
 
-soundClass = 'legno'
-path = '/Users/MaX/Desktop/ML4A/Project/data_seg/'+soundClass+'/'
-path_seg = '/Users/MaX/Desktop/ML4A/Project/data_seg/'+soundClass+'/'
-path_out = '/Users/MaX/Desktop/ML4A/Project/data_out/'+soundClass+'/'
+soundClass = 'voci'
+audio_folder = '../../data/data_segmented/'+soundClass+'/'
+out_folder = '../../data/data_features/'+soundClass+'/'
+
 ext = '*.wav'
 
     
 def get_features(y, sr): 
-    #feat_stft = np.abs(librosa.stft(y))
-    feat_stft = []
     
-    S = librosa.feature.melspectrogram(y, sr=sr, n_fft=1024,hop_length=512, n_mels=120)
+    # Audio spectogram
+    feat_stft = np.abs(librosa.stft(y))
+    
+    # Audio melspectrogram
+    S = librosa.feature.melspectrogram(y, sr=sr, n_fft=1024,hop_length=512, n_mels=60)
     log_S = librosa.logamplitude(S, ref_power=np.max)
     
-    #mfcc = librosa.feature.mfcc(S=log_S, n_mfcc=13)
-    #delta_mfcc = librosa.feature.delta(mfcc)
-    #delta2_mfcc = librosa.feature.delta(mfcc, order=2)
+    # MFCC
+    mfcc = librosa.feature.mfcc(S=log_S, n_mfcc=13)
+    delta_mfcc = librosa.feature.delta(mfcc)
+    delta2_mfcc = librosa.feature.delta(mfcc, order=2)
 
-    #feat_mfcc = np.concatenate((np.mean(mfcc,1), np.mean(delta_mfcc,1), np.mean(delta2_mfcc,1)))
-    #feat_mfcc = (feat_mfcc-np.mean(feat_mfcc))/np.std(feat_mfcc)
-    
-    feat_dict = {'stft': feat_stft, 'mel': log_S}
+    feat_mfcc = np.vstack((mfcc,delta_mfcc,delta2_mfcc))
+
+    feat_dict = {'stft': feat_stft, 'stft_mean': np.mean(feat_stft,1),'mel': log_S, 'mel_mean': np.mean(log_S,1), 'mfcc': feat_mfcc, 'mfcc_mean': np.mean(feat_mfcc,1)}
     
     return feat_dict
 
@@ -43,19 +47,21 @@ def get_features(y, sr):
 if __name__ == "__main__":
 
     files = []
-    for root, dirnames, filenames in os.walk(path):
+    for root, dirnames, filenames in os.walk(audio_folder):
         for filename in fnmatch.filter(filenames, ext):
             files.append(os.path.join(root, filename))
     
-    print("found "+ext+" %d files in %s"%(len(files),path))
+    print("found "+ext+" %d files in %s"%(len(files),audio_folder))
     
 
-    data = []  
-    data_mean = []
+    collectedFeat_MFCC = []  
+    collectedFeat_Mel = [] 
+    collectedFeat_STFT = []   
+    
+    widgets = [prog.Counter(),'/', str(len(files)),' | ',prog.Percentage(),' | ', prog.Bar(marker='='),' | ', prog.ETA(),' | ',prog.AbsoluteETA()]
+    bar = prog.ProgressBar(widgets=widgets, maxval=len(files)).start()
     
     for i,f in enumerate(files):
-        
-        print ("get %d of %d = %s"%(i+1, len(files), f))
         
         y, sr = librosa.load(f)
         if (np.sum(y) != 0):
@@ -65,24 +71,34 @@ if __name__ == "__main__":
         # Feature Extraction
             
         feat = get_features(y, sr)
+        
+        tail, filename = os.path.split(f)
+        feat['fileFolder'] = tail+'/'
+        feat['fileName'] = filename
+        feat['class'] = soundClass
+        
+        # Convert numpy arrays into lists
+        for k in feat.keys():
+            if (type(feat[k]).__module__ == np.__name__):
+                feat[k] = feat[k].tolist()
+        
+        # Save NPZ file
+        np.savez(out_folder+filename+'.npz', feat)
+        
             
-        #a = feat['mfcc'].tolist()
-        #b = feat['stft'].tolist()
-        b = []
-        c = feat['mel'].tolist()
-        c_mean = np.mean(c,1).tolist()
+        collectedFeat_MFCC.append({'class': feat['class'], 'fileFolder': feat['fileFolder'], 'fileName': feat['fileName'], 'mfcc_mean': feat['mfcc_mean'], 'mfcc': feat['mfcc']})
+        collectedFeat_Mel.append({'class': feat['class'], 'fileFolder': feat['fileFolder'], 'fileName': feat['fileName'], 'mel_mean': feat['mel_mean'], 'mel': feat['mel']})
+        collectedFeat_STFT.append({'class': feat['class'], 'fileFolder': feat['fileFolder'], 'fileName': feat['fileName'], 'stft_mean': feat['stft_mean'], 'stft': feat['stft']})
+        
+        if ((i%10)==0):
+            bar.update(i)
     
-        data.append({'path':files[i],'stft': b,'mel':c, 'class':soundClass})
-        data_mean.append({'path':files[i],'stft': b,'mel':c_mean, 'class':soundClass})
-
-    #tail, filename = os.path.split(f)
-    #with open(path_out+soundClass+'.json', 'w') as f:
-    #    json.dump(data, f) 
-        
-    with open(path_out+soundClass+'_mean.json', 'w') as f_mean:
-        json.dump(data_mean, f_mean)    
-        
-            
+    
+    bar.finish()    
+    
+    np.savez(out_folder+soundClass+'_MFCC.npz', collectedFeat_MFCC)
+    np.savez(out_folder+soundClass+'_Mel.npz', collectedFeat_Mel)
+    np.savez(out_folder+soundClass+'_STFT.npz', collectedFeat_STFT)
             
             
             

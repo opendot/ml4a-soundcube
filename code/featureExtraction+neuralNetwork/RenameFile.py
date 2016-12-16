@@ -16,8 +16,8 @@ from subprocess import call
 # Rename Files
 
 soundClass = 'legno'
-path = '/Users/MaX/Desktop/ML4A/Project/data_seg/'+soundClass+'/'
-path_out = '/Users/MaX/Desktop/ML4A/Project/data_seg/'+soundClass+'/'
+path = '../data/data_segmented/'+soundClass+'/'
+path_out = '../data/data_segmented/'+soundClass+'/'
 ext = '.wav'
 
 
